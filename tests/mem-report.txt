@@ -1,0 +1,112 @@
+
+################################################################################
+# Final                                                                        #
+################################################################################
+
+Number of expanded macros:                         2
+Average number of tokens per macro expansion:      1
+
+Line Table allocations during the compilation process
+Number of ordinary maps used:            6 
+Ordinary map used size:                144 
+Number of ordinary maps allocated:     341 
+Ordinary maps allocated size:         8184 
+Number of macro maps used:               2 
+Macro maps used size:                   64 
+Macro maps locations size:              16 
+Macro maps size:                        80 
+Duplicated maps locations size:          8 
+Total allocated maps size:              16k
+Total used maps size:                  224 
+Ad-hoc table size:                    4096 
+Ad-hoc table entries used:               3 
+optimized_ranges:                       84 
+unoptimized_ranges:                      0 
+
+Memory still allocated at the end of the compilation process
+Size      Allocated        Used    Overhead
+8              8192        5216         240 
+16               36k         34k        792 
+32               12k       9280         216 
+64             4096        1280          64 
+256             676k        672k       9464 
+512            8192        4608         112 
+1024             32k         28k        448 
+2048             56k         54k        784 
+4096           4096        4096          56 
+8192             48k         40k        336 
+16384            48k         32k        168 
+24               52k         48k        936 
+40              320k        315k       5120 
+48              232k        229k       3712 
+56             4096        1960          64 
+72             4096        4032          56 
+80              264k        262k       3696 
+88             4096          88          56 
+104            4096         520          56 
+112            4096         336          56 
+120            4096        3360          56 
+152              12k       9424         168 
+128            4096         256          56 
+144            8192        5040         112 
+168             164k        158k       2296 
+184            4096         184          56 
+96             4096        2016          56 
+272            8192        4896         112 
+424            4096         848          56 
+Total          2032k       1930k         28k
+
+String pool
+entries:                        3350
+identifiers:                    3350 (100.00%)
+slots:                          16384
+deleted:                        0
+GGC bytes:                      49k
+table size:                     128k
+coll/search:                    0.0434
+ins/search:                     0.2987
+avg. entry:                     15.02 bytes (+/- 6.62)
+longest entry:                  38
+(No per-node statistics)
+Type hash: size 2039, 830 elements, 1.135752 collisions
+DECL_DEBUG_EXPR  hash: size 1021, 0 elements, 0.000000 collisions
+DECL_VALUE_EXPR  hash: size 1021, 0 elements, 0.000000 collisions
+No GIMPLE statistics
+No RTX statistics
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+Heap vectors                                      sizeof(T)       Leak            Peak     Times       Leak items Peak items
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+Heap vectors                                      sizeof(T)       Leak            Peak     Times       Leak items Peak items
+--------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                               0                         0                0 
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Alias oracle query stats:
+  refs_may_alias_p: 0 disambiguations, 0 queries
+  ref_maybe_used_by_call_p: 0 disambiguations, 0 queries
+  call_may_clobber_ref_p: 0 disambiguations, 0 queries
+  stmt_kills_ref_p: 0 kills, 0 queries
+  nonoverlapping_component_refs_p: 0 disambiguations, 0 queries
+  nonoverlapping_refs_since_match_p: 0 disambiguations, 0 must overlaps, 0 queries
+  aliasing_component_refs_p: 0 disambiguations, 0 queries
+  TBAA oracle: 0 disambiguations 0 queries
+               0 are in alias set 0
+               0 queries asked about the same object
+               0 queries asked about the same alias set
+               0 access volatile
+               0 are dependent in the DAG
+               0 are aritificially in conflict with void *
+
+Modref stats:
+  modref kill: 0 kills, 0 queries
+  modref use: 0 disambiguations, 0 queries
+  modref clobber: 0 disambiguations, 0 queries
+  0 tbaa queries (-nan per modref query)
+  0 base compares (-nan per modref query)
+
+PTA query stats:
+  pt_solution_includes: 0 disambiguations, 0 queries
+  pt_solutions_intersect: 0 disambiguations, 0 queries
