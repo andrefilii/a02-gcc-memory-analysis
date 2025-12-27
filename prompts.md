@@ -27,8 +27,6 @@
 **Output Summary:**
 The model acknowledged the persona and the formatting constraints. It confirmed it is ready to analyze GCC memory internals.
 
----
-
 ## Prompt 1: High-Level Architecture
 **Model:** Gemini 3 Pro<br>
 **Goal:** Obtain architectural overview of GGC vs Obstacks and pipeline transition.
@@ -47,8 +45,6 @@ The model provided a breakdown of GCC memory management:
 3. **Pipeline:** FE (Obstacks -> Trees) -> ME (GIMPLE + Pools) -> BE (RTL + specialized allocators).
 
 > [See Verification of this output](./verification.md#verification-of-prompt-1-high-level-architecture)
-
----
 
 ## Prompt 2: Modern GCC Architecture (Correction)
 **Model:** Gemini 3 Pro
@@ -74,3 +70,34 @@ The model rewrote the report to reflect the modern codebase:
 3.  **Filenames:** Correctly referenced `.cc` files.
 
 > [See Verification of this output](./verification.md#verification-of-prompt-2-modern-gcc-architecture-revised)
+
+## Prompt 3: Deep Dive into Obstacks
+**Model:** Gemini 3 Pro
+
+**Goal:** Detailed analysis of the Obstack memory mechanism, specifically focusing on the "Bump Pointer" algorithm ($O(1)$) and its integration into modern GCC C++ (via `bitmap_obstack`).
+
+**Input:**
+> **Phase 2 Task: Deep Dive into Obstacks**
+>
+> Please analyze the **Obstack** memory management mechanism in detail, specifically how this legacy C structure (`libiberty`) is utilized within the modern C++ GCC codebase.
+> 1. **Mechanism:** Explain the internal working of an obstack. Specifically, detail the **"bump pointer"** allocation method and why it provides  performance.
+> 2. **Modern Usage & API:** Describe how obstacks are exposed in the code.
+>    - Are the standard macros (`obstack_alloc`, `obstack_free`) still used directly in `.cc` files?
+>    - How does `bitmap_obstack` (in `bitmap.cc` or headers) wrap this functionality for data flow analysis?
+> 3. **Use Case - The Front End:** Explain how the Front End uses obstacks during parsing (e.g., for temporary strings) and why this is faster than `new`/`malloc`.
+> 4. **The "Freeing" Logic:** Explain the unique property of `obstack_free` (freeing everything after a pointer) and how this supports "Scope-based" memory management.
+>
+> **Verification Requirements:**
+> * In Section 2, focus only on **Critical Mechanisms**.
+> * Example: Verify the "bump pointer" logic in `obstack.h` or the definition of `bitmap_obstack`.
+> 
+> 
+
+**Output Summary:**
+The model provided a deep technical breakdown:
+1.  **Mechanism:** Defined the "Bump Pointer" strategy (Linear Allocation). Checks `chunk_limit` vs `next_free`; if space exists, allocation is a simple pointer increment ($O(1)$).
+2.  **Modern Usage:** Confirmed `obstack` macros are still used in C++ files (`cp/parser.cc`) and wrapped by `bitmap_obstack` in `bitmap.cc` for data flow analysis.
+3.  **Front End:** Explained how `obstack_1grow` allows zero-copy string construction during parsing.
+4.  **Freeing:** Explained that `obstack_free` resets the pointer, invalidating all subsequent objects instantly (Scope-based reclamation).
+
+> [See Verification of this output](./verification.md#verification-of-prompt-3-deep-dive-into-obstacks)
