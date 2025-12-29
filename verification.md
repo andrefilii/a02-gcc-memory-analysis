@@ -85,3 +85,70 @@ This document records the validation steps taken to ensure the accuracy of the A
 - **Finding:** The file defines `class object_allocator`. It wraps the internal pool logic, confirming the transition to C++ classes for pool management described in the report.
 
 **Result:** ✅ **VERIFIED**.
+
+## Verification of Prompt 3: Deep Dive into Obstacks
+
+### Claim 1: Bump Pointer Allocation ($O(1)$ Mechanism)
+**Method:** Source Code Inspection
+
+**Evidence:**
+- **File:** `include/obstack.h`
+- **Finding:** Examined `obstack_make_room` and related macros.
+- **Code Snippet (GNU C Extension path):**
+  ```c
+  #define obstack_make_room(OBSTACK, length)                \
+    __extension__                                           \
+    ({ struct obstack *__o = (OBSTACK);                     \
+       _OBSTACK_SIZE_T __len = (length);                    \
+       if (obstack_room (__o) < __len)                      \
+         _obstack_newchunk (__o, __len);                    \
+       (void) 0; })
+- **Analysis:**
+  1. Fast Path Verification: The macro checks `if (obstack_room < len)`. If this is false (space exists), the code does nothing and exits. This confirms that for the vast majority of allocations, there is zero function call overhead.
+  2. Slow Path: Only when the chunk is full does it call `_obstack_newchunk`.
+
+**Result:** ✅ **VERIFIED**.
+
+### Claim 2: `bitmap_obstack` Wrapper
+**Method:** Source Code Inspection
+
+**Evidence:**
+- **File:** `gcc/bitmap.h` (and `bitmap.cc`)
+- **Finding:** Located the definition of `struct bitmap_obstack`.
+- **Composition:** Confirmed it contains a member `struct obstack obstack`.
+- **Analysis:** This verifies that modern GCC data structures (like Bitmaps used in optimization) are indeed wrappers around the legacy `libiberty` obstacks, providing type safety and helper functions.
+
+**Result:** ✅ **VERIFIED**.
+
+### Claim 3: Front End Usage (Parsing)
+**Method:** Source Code Inspection
+
+**Evidence:**
+- **File:** `gcc/cp/parser.cc` (C++ Parser)
+- **Finding:** Search for `obstack_finish` yielded multiple hits.
+- **Analysis:** Confirms that the C++ Front End uses the "grow and finish" pattern for temporary parsing artifacts (likely strings or token buffers), matching the report's description of the parsing phase memory lifecycle.
+
+**Result:** ✅ **VERIFIED**.
+
+### Claim 4: Scope-Based Freeing Logic (Runtime)
+**Method:** Dynamic Analysis (Micro-Benchmark)
+
+**Evidence:**
+- **Test File:** `tests/verify_obstack.c`
+- **Execution Log:**
+  ```text
+  Obstack initialized. Base Chunk Address: 0x55de245582a0
+  Scope Marker (Rewind Point): 0x55de245582b0
+  Allocated Obj1 at: 0x55de245582b0
+  Allocated Obj2 at: 0x55de245582f0
+  Current next_free pointer: 0x55de24558370
+  Freeing to Scope Marker...
+  New next_free pointer:     0x55de245582b0
+  VERIFICATION SUCCESS: Pointer reset to mark.
+
+**Analysis:**
+  1. Behavior: The `next_free` pointer moved backwards from `...370` to `...2b0`.
+  2. Exact Match: The new pointer exactly matches the scope marker saved earlier.
+  3. Mechanism: This proves `obstack_free` is a simple pointer assignment ($O(1)$) and does not perform per-object deallocation.
+
+**Result: ✅ VERIFIED.**
