@@ -101,3 +101,34 @@ The model provided a deep technical breakdown:
 4.  **Freeing:** Explained that `obstack_free` resets the pointer, invalidating all subsequent objects instantly (Scope-based reclamation).
 
 > [See Verification of this output](./verification.md#verification-of-prompt-3-deep-dive-into-obstacks)
+
+## Prompt 4: The GGC Subsystem & Roots
+**Model:** Gemini 3 Pro
+**Goal:** Detailed analysis of the Garbage Collector (GGC), focusing on the "Roots" problem, the role of `gengtype`, and the rationale behind using a custom GC over smart pointers.
+
+**Input:**
+> **Phase 3 Task: The GGC Subsystem (Garbage Collection)**
+> Please analyze the **GGC (Garbage Collector)** in modern GCC (v13+), focusing on how it manages persistent IR objects like GIMPLE `tree` nodes and RTL.
+> 1. **The "Roots" Problem:** Explain how GCC identifies which objects are "alive". Detail the role of `gengtype` (the generator tool) and the `GTY(())` markers in source files. How does this solve the problem of C++ not having reflection?
+> 2. **Trade-offs & Rationale:** Why does GCC use a custom Garbage Collector instead of:
+>    * Standard C++ smart pointers (`std::shared_ptr`)?
+>    * A general-purpose GC (like Boehm-GC)?
+>    * *Hint: Discuss circular references in IR graphs and pointer density.*
+> 3. **Allocation Mechanics:**
+>    * How are `tree` nodes allocated? (Reference `tree.cc` or `make_node`).
+>    * How does the Mark-and-Sweep process actually run? (Reference `ggc_collect`).
+> 4. **Paging Strategy:** Briefly explain how `ggc-page.cc` combats fragmentation using "Orders" (powers of two) and why this is better for compiler workloads than a standard heap.
+> 
+> **Verification Requirements:**
+> * Point me to the file where `gengtype` logic or `gt-*.h` files are mentioned.
+> * Mention where `tree_node_structure` is defined or managed
+
+**Output Summary:**
+The model explained the core GC architecture:
+1.  **Reflection (`gengtype`):** GCC solves C++'s lack of reflection by parsing `GTY(())` markers and generating `gt-*.h` files with traversal functions (`gt_ggc_mx`).
+2.  **Trade-offs:** Explained why GGC is preferred:
+    * **Vs `shared_ptr`:** Avoiding reference counting overhead and memory leaks in cyclic IR graphs.
+    * **Vs Boehm-GC:** GGC is "precise" (avoids false pointers) and enables PCH (Precompiled Header) serialization via memory mapping.
+3.  **Mechanism:** Described `make_node` (in `tree.cc`) as the factory calling `ggc_alloc`, and the segregated "Page Order" strategy in `ggc-page.cc` to minimize fragmentation for uniform IR nodes.
+
+> [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
