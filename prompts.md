@@ -6,6 +6,7 @@
 
 **Input:**
 > **System Persona:** Act as a Senior GCC Compiler Engineer and C Systems Architect. You have deep knowledge of GCC internals, specifically the memory management subsystems including Obstacks, GGC (Garbage Collection), and Pool Allocators.
+>
 > **Goal:** We are writing a technical research report titled "Internal Memory Management in GCC During Compilation."
 >
 > **My Requirements:**
@@ -104,6 +105,7 @@ The model provided a deep technical breakdown:
 
 ## Prompt 4: The GGC Subsystem & Roots
 **Model:** Gemini 3 Pro
+
 **Goal:** Detailed analysis of the Garbage Collector (GGC), focusing on the "Roots" problem, the role of `gengtype`, and the rationale behind using a custom GC over smart pointers.
 
 **Input:**
@@ -130,5 +132,31 @@ The model explained the core GC architecture:
     * **Vs `shared_ptr`:** Avoiding reference counting overhead and memory leaks in cyclic IR graphs.
     * **Vs Boehm-GC:** GGC is "precise" (avoids false pointers) and enables PCH (Precompiled Header) serialization via memory mapping.
 3.  **Mechanism:** Described `make_node` (in `tree.cc`) as the factory calling `ggc_alloc`, and the segregated "Page Order" strategy in `ggc-page.cc` to minimize fragmentation for uniform IR nodes.
+
+> [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
+
+## Prompt 5: Phase 3 Supplement (GIMPLE & RTL)
+**Model:** Gemini 3 Pro
+
+**Goal:** Address specific Project Guideline A02 ("Analyze relevant GCC source code... during GIMPLE/RTL generation") by distinguishing between generic Tree allocation and the specialized GIMPLE Tuple/RTL allocators.
+
+**Input:**
+>**Context:** We are refining the "Phase 3: GGC" section of our GCC Memory Management report.
+>
+>**The Problem:** We have covered how `tree` nodes are allocated, but we missed the specific details for **GIMPLE** and **RTL**. The project guidelines explicitly require us to analyze "GIMPLE/RTL generation."
+>
+>**Task:**
+>Write a technical deep-dive section titled **"Allocation Strategies for GIMPLE and RTL"**.
+>
+>**Requirements:**
+>1.  **GIMPLE Tuples (The Middle End):**
+>     * Explain that GIMPLE statements are **not** just `tree` nodes (they are "Tuples").
+>     * Analyze `gcc/gimple.cc`. Identify the specific function used to allocate statements (look for `gimple_alloc` or similar).
+>     * Confirm if they use GGC (`ggc_alloc`) or a different mechanism.
+>2.  **RTL (The Back End):**
+>     * Analyze `gcc/rtl.cc` (or `emit-rtl.c`).
+>     * Identify how `rtx` (Register Transfer Language) nodes are allocated (look for `rtx_alloc`).
+>     * Explain how GGC manages these low-level structures.
+>3.  **Code Citations:** You must cite the specific files and function names found in GCC v13+.
 
 > [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
