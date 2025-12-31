@@ -228,3 +228,44 @@ This document records the rigorous validation process applied to the AI-generate
 * **Analysis:** This verifies that the Back End (RTL) uses a variable-sized allocation strategy (`rtx_alloc`) that is deeply integrated with GGC. It confirms that the entire compilation pipeline (Front, Middle, and Back ends) shares the same memory backbone.
 
 **Result:** ✅ **VERIFIED**.
+
+## Verification of Prompt 6: Optimization Passes & Memory Pools
+
+### Claim 1: Typed Pool Usage in Optimization Passes
+
+**Method:** Source Code Inspection
+
+**Evidence:**
+* **File:** `gcc/tree-ssa-structalias.cc`
+* **Finding:**
+  * Located the declaration: `static object_allocator<variable_info> variable_info_pool ("Variable info pool");`
+* **Analysis:** This confirms that the Tree-SSA pass (specifically the structural alias analysis) uses typed C++ allocators (`object_allocator<variable_info>`) to manage temporary structures. This isolates pass-specific data from the global Gargabe Collector, aligning with the "Arena" memory model described in the report.
+
+**Result:** ✅ **VERIFIED**.
+
+### Claim 2: Bitmap Bulk Cleanup Strategy
+
+**Method:** Source Code Inspection
+
+**Evidence:**
+
+* **File:** `gcc/tree-into-ssa.cc` (Function: `fini_ssa_renamer`)
+* **Finding:**
+  * Located specific call: `bitmap_obstack_release (&update_ssa_obstack);`.
+* **Analysis:** This explicitly validates the "bulk release" strategy. The function `fini_ssa_renamer` cleans up the entire SSA updating context in one operation (`_release`) rather than freeing every bitmap individually. This confirms the performance optimization described in the report.
+
+**Result:** ✅ **VERIFIED**.
+
+### Claim 3: Pool Release Mechanism
+
+**Method:** Source Code Inspection
+
+**Evidence:**
+
+* **File:** `gcc/alloc-pool.h`
+* **Finding:**
+  * Examined the `release()` method within the `object_allocator` class.
+  * Key code: it calls `m_allocator.release()`.
+* **Analysis:** This confirms the architectural claim: `object_allocator` is a wrapper around an underlying allocator (`m_allocator`). When released, it returns memory to the system (or the parent block allocator), ensuring that pass-specific memory is distinct from the persistent GGC heap.
+
+**Result:** ✅ **VERIFIED**.

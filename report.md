@@ -264,3 +264,38 @@ GCC’s "Hybrid" memory model is a deliberate architectural choice driven by spe
 
 **Design Rationale:**
 GCC uses GGC for the **IR (Intermediate Representation)** because IR nodes form a complex, cyclic graph where ownership is shared across many passes. It uses **Pools/Obstacks** for **Analysis Data** because this data is strictly hierarchical and local to the algorithm computing it. Mixing these models prevents the "GC Pause" problem from dominating compilation time.
+
+SECTION 1: REPORT CONTENT
+
+## Conclusion: The Hybrid Memory Architecture of GCC
+
+Our analysis of the GNU Compiler Collection (v13+) reveals that GCC does not rely on a singular memory management strategy. Instead, it employs a sophisticated, three-tiered hybrid architecture tailored to the distinct distinct phases of the compilation pipeline. This design is not accidental; it is a necessary response to the conflicting requirements of compilation: the need for persistent, cyclic graph structures versus the need for high-frequency, ephemeral analysis data.
+
+### 1. Summary of the Architecture
+
+Through our source code inspection, we have identified three distinct layers of memory management:
+
+1. **Front End (Lexing/Parsing): Region-Based Allocation.**
+During the initial translation of source code, GCC leverages **Obstacks** (via `libiberty`). This aligns with the stack-like nature of parsing. As scopes are entered and exited, memory is allocated linearly and freed in bulk, minimizing overhead for temporary strings and tokens.
+2. **Persistent Storage (IR Spine): The GGC Subsystem.**
+The core Intermediate Representations—**Tree** (High-Level), **GIMPLE** (Middle-End), and **RTL** (Back-End)—are managed by the **GGC (Garbage Collector)**. This layer uses `gengtype` for reflection and Mark-and-Sweep for reclamation, ensuring that complex, cyclic structures (like Control Flow Graphs) are managed safely without manual intervention.
+3. **Optimization Passes (Transient Data): Pools and Bitmaps.**
+The computational heavy lifting (SSA, Liveness, Scheduling) generates massive amounts of temporary data. Here, GCC bypasses the GGC in favor of **Pools** (`object_allocator`) and **Bitmap Obstacks**. This isolates high-frequency allocation churn from the long-lived heap, preventing fragmentation and GC pauses.
+
+### 2. Rationale: Why Not Standard Allocators?
+
+A key finding of this research is why GCC rejects standard C++ paradigms (like `new`/`delete` or `std::shared_ptr`) in favor of this complex custom implementation.
+
+* **The "Graph" Problem vs. `std::shared_ptr`:**
+Compiler IRs are inherently cyclic (e.g., a Loop header pointing to a latch block, which points back to the header). Standard reference counting (`std::shared_ptr`) fails in cyclic graphs, leading to memory leaks unless complex `weak_ptr` schemes are strictly enforced. The GGC Mark-and-Sweep algorithm naturally handles these cycles, guaranteeing correctness.
+* **The "Fragment" Problem vs. `malloc`:**
+Compilers allocate millions of tiny objects (16-40 bytes). Using the system `malloc` for these would incur significant per-object overhead (headers) and severe fragmentation. GCC's **Pool Allocators** and **Page Orders** eliminate this overhead by packing identical objects tightly, achieving near-perfect memory density.
+
+### 3. Final Verdict: Performance and Correctness
+
+The efficacy of GCC's memory management lies in its **specialization**.
+
+* **Correctness:** By delegating the lifetime management of the complex IR graph to GGC, GCC minimizes the class of bugs related to dangling pointers and memory leaks in the persistent state.
+* **Performance:** By utilizing `object_allocator` and `bitmap_obstack` for pass-local data, GCC achieves $O(1)$ allocation and deallocation performance. This ensures that the heavy memory churn of optimization passes (allocating millions of temporary constraints) does not degrade the performance of the global heap or trigger unnecessary garbage collection cycles.
+
+In conclusion, GCC's memory strategy is a highly tuned system where **GGC provides the safety mechanism** for the compiler's long-term memory, while **Pools and Obstacks provide the speed** required for its computational algorithms.
