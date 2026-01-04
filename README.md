@@ -4,17 +4,23 @@ This repository documents the research into GCC's memory allocation strategies, 
 
 ## Project Deliverables
 
+All documentation is available in **PDF** (formatted) and **Markdown** (source text) formats.
+
 ### 1. Research Report
-* **[PDF Version](report.pdf)**: The comprehensive analysis refined with academic formatting and styling.
-* **[Markdown Version](report.md)**: The raw content of the report.
+**[📄 Read the Final Report (PDF)](report.pdf)**
+* *[Source Markdown: report.md](report.md)*
 
-A deep dive into how GCC manages memory from the Front End (Parsing) through to the Back End (RTL generation), focusing on performance and modularity.
+A comprehensive analysis of how GCC manages memory from the Front End (Parsing) through to the Back End (RTL generation), focusing on performance and modularity.
 
-### 2. [Prompt Engineering Log](prompts.md)
-A documentation of the specific prompts used with the AI model to generate the technical analysis.
+### 2. Verification & Methodology
+* **[PDF Version](verification.pdf)** | **[Markdown Version](verification.md)**
 
-### 3. [Verification & Methodology](verification.md)
-A cross-referencing document detailing how the AI's claims were verified against the GCC source code and official documentation to ensure accuracy.
+A cross-referencing document detailing how the AI's claims were verified against the GCC source code to ensure accuracy.
+
+### 3. Prompt Engineering Log
+* **[PDF Version](prompts.pdf)** | **[Markdown Version](prompts.md)**
+
+A complete record of the specific prompts used to generate the analysis, including the refinement steps taken to correct initial hallucinations.
 
 ---
 **Author:** Andrea Filippi
