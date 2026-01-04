@@ -122,9 +122,7 @@ The **GGC (GCC Garbage Collector)** is the dedicated memory manager for the comp
 A fundamental challenge in implementing garbage collection in C++ is the lack of native reflection; the runtime system does not automatically know which fields in a struct are pointers that must be traced.
 
 * **The Solution (`GTY` Markers):** GCC solves this via a custom markup system. Developers annotate source code structures with `GTY(())` ("Garbage Type") markers.
-* *Example:* `struct GTY(()) tree_base { ... }`
-
-
+    * *Example:* `struct GTY(()) tree_base { ... }`
 * **The Generator (`gengtype`):** During the build process, a specialized tool called `gengtype` parses the source code. It identifies all `GTY`-marked types and global variables (roots).
 * **Generated Reflection:** For every source file using GGC (e.g., `tree.cc`), `gengtype` generates a corresponding header file (e.g., `gt-tree.h`). These files contain generated functions (typically named `gt_ggc_mx_*`) that know exactly the layout of the structures and how to recursively "mark" every pointer contained within them. This provides the precise object graph traversal required for the collector.
 
@@ -193,10 +191,8 @@ As the compiler transitions to the Back End, it lowers GIMPLE to RTL. RTL nodes 
 * **Source File:** `gcc/rtl.cc`
 * **Allocation Mechanism (`rtx_alloc`):**
 The fundamental allocator is `rtx_alloc` (often wrapped by `gen_rtx_*` functions in `emit-rtl.cc`).
-* It determines the size of the RTL node based on its `code` (e.g., `PLUS`, `MEM`, `SET`) using the `rtx_code_size` table.
-* It calls `ggc_alloc_rtx_def_stat` to acquire memory.
-
-
+    * It determines the size of the RTL node based on its `code` (e.g., `PLUS`, `MEM`, `SET`) using the `rtx_code_size` table.
+    * It calls `ggc_alloc_rtx_def_stat` to acquire memory.
 * **GGC Integration:** RTL generation creates immense memory pressure. Because `rtx` nodes are often temporary (created and discarded during instruction combination or peephole optimization), relying on GGC is crucial. The `rtx_def` structure is marked with `GTY(())`, allowing the collector to trace pointers from instruction chains into the RTL graph.
 
 ## Per-Pass Memory Management (Pools & Bitmaps)
@@ -264,8 +260,6 @@ GCC’s "Hybrid" memory model is a deliberate architectural choice driven by spe
 
 **Design Rationale:**
 GCC uses GGC for the **IR (Intermediate Representation)** because IR nodes form a complex, cyclic graph where ownership is shared across many passes. It uses **Pools/Obstacks** for **Analysis Data** because this data is strictly hierarchical and local to the algorithm computing it. Mixing these models prevents the "GC Pause" problem from dominating compilation time.
-
-SECTION 1: REPORT CONTENT
 
 ## Conclusion: The Hybrid Memory Architecture of GCC
 
