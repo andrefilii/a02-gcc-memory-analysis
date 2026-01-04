@@ -4,8 +4,11 @@ This repository documents the research into GCC's memory allocation strategies, 
 
 ## Project Deliverables
 
-### 1. [Research Report](report.md)
-A comprehensive analysis of how GCC manages memory from the Front End (Parsing) through to the Back End (RTL generation), focusing on performance and modularity.
+### 1. Research Report
+* **[PDF Version](report.pdf)**: The comprehensive analysis refined with academic formatting and styling.
+* **[Markdown Version](report.md)**: The raw content of the report.
+
+A deep dive into how GCC manages memory from the Front End (Parsing) through to the Back End (RTL generation), focusing on performance and modularity.
 
 ### 2. [Prompt Engineering Log](prompts.md)
 A documentation of the specific prompts used with the AI model to generate the technical analysis.

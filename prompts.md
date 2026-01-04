@@ -32,7 +32,8 @@ The prompts listed below are the final, refined versions sent to "The Writer Cha
 
 
 ## Prompt 0: System Persona & Configuration
-**Model:** Gemini 3 Pro<br>
+**Model:** Gemini 3 Pro
+
 **Goal:** Configure the AI to act as a Senior GCC Engineer, enforce strict technical accuracy, and define the output format (Markdown + Verification Hints).
 
 **Input:**
@@ -60,7 +61,8 @@ The prompts listed below are the final, refined versions sent to "The Writer Cha
 The model acknowledged the persona and the formatting constraints. It confirmed it is ready to analyze GCC memory internals.
 
 ## Prompt 1: High-Level Architecture
-**Model:** Gemini 3 Pro<br>
+**Model:** Gemini 3 Pro
+
 **Goal:** Obtain architectural overview of GGC vs Obstacks and pipeline transition.
 
 **Input:**
@@ -80,6 +82,7 @@ The model provided a breakdown of GCC memory management:
 
 ## Prompt 2: Modern GCC Architecture (Correction)
 **Model:** Gemini 3 Pro
+
 **Goal:** Re-generate the architectural overview to align with GCC 13+ (C++ migration) after verifying the initial output relied on legacy C filenames.
 
 **Input:**
@@ -242,7 +245,6 @@ The model explained the core GC architecture:
 >
 >**Format:** Update the report text to reflect these specific source code locations.
 
-> [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
 
 ## Prompt 8: Conclusions
 **Model:** Gemini 3 Pro
@@ -259,10 +261,10 @@ The model explained the core GC architecture:
 >
 >**Requirements:**
 >1.  **The Hybrid Model:** Summarize the "Three-Layer Architecture" we discovered:
->    * **Front End:** Obstacks (Fast, stack-like).
->    * **Middle/Back End Storage:** GGC (Graph-friendly, handles cycles).
->    * **Optimization Passes:** Pools/Bitmaps (Cache-efficient, transient).
+>     * **Front End:** Obstacks (Fast, stack-like).
+>     * **Middle/Back End Storage:** GGC (Graph-friendly, handles cycles).
+>     * **Optimization Passes:** Pools/Bitmaps (Cache-efficient, transient).
 >2.  **Rationale & Trade-offs (The Final Verdict):**
->    * Explain **why** GCC uses this complex hybrid model instead of just `malloc/free` or standard C++ smart pointers (`std::shared_ptr`).
->    * *Hint:* Mention the "Graph" nature of code (circular references) which makes GGC necessary, and the "Batch" nature of compilation which makes Pools efficient.
+>     * Explain **why** GCC uses this complex hybrid model instead of just `malloc/free` or standard C++ smart pointers (`std::shared_ptr`).
+>     * *Hint:* Mention the "Graph" nature of code (circular references) which makes GGC necessary, and the "Batch" nature of compilation which makes Pools efficient.
 >3.  **Impact on Performance:** Conclude on how `object_allocator` and `bitmap_obstack` (which we verified) specifically reduce fragmentation and overhead during heavy optimization passes.
