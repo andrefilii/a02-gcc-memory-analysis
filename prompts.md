@@ -200,7 +200,7 @@ The model explained the core GC architecture:
 
 **Goal:** Address the final Project Guideline requirements: analyzing specific "optimization passes" (Task 2) and providing the "Rationale and Trade-offs" (Task 2) analysis. This phase investigates the use of `alloc-pool` and `bitmap_obstack` in the Tree-SSA pass.
 
-**Prompt Used:**
+**Input:**
 
 >**System Persona:** Continue acting as the Senior GCC Compiler Engineer.
 >
@@ -230,7 +230,7 @@ The model explained the core GC architecture:
 ## Prompt 7: Prompt 6 Refinement - Correction of Tree-SSA Case Study
 **Goal:** Correct technical hallucinations in the previous output. The initial report incorrectly cited `rewrite_blocks` and `compute_global_livein` as the location of memory management logic. I verified the source code and found the logic actually resides in `init_ssa_renamer` and `fini_ssa_renamer`.
 
-**Prompt Used:**
+**Input:**
 
 >**Context:** We are refining the "Phase 4" section. I have audited your previous response against the GCC source code and found specific errors in the "Case Study" section regarding function names.
 >
@@ -251,7 +251,7 @@ The model explained the core GC architecture:
 
 **Goal:** Generate the final Conclusion. Synthesize the findings from all phases to answer the project's core question regarding the trade-offs between performance (Pools/Obstacks) and correctness (GGC for complex graphs).
 
-**Prompt Used:**
+**Input:**
 >**Context:** We are writing the **Conclusion** of our research report "Internal Memory Management in GCC."
 >
 >**Goal:** Synthesize the findings from Phases 1-4 into a final verdict that addresses the project's core question: *How do these memory strategies contribute to performance and correctness?*
