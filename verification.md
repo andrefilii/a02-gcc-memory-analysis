@@ -243,6 +243,20 @@ This document records the rigorous validation process applied to the AI-generate
 
 **Result:** ✅ **VERIFIED**.
 
+### Claim 2: Pool Release Mechanism
+
+**Method:** Source Code Inspection
+
+**Evidence:**
+
+* **File:** `gcc/alloc-pool.h`
+* **Finding:**
+  * Examined the `release()` method within the `object_allocator` class.
+  * Key code: it calls `m_allocator.release()`.
+* **Analysis:** This confirms the architectural claim: `object_allocator` is a wrapper around an underlying allocator (`m_allocator`). When released, it returns memory to the system (or the parent block allocator), ensuring that pass-specific memory is distinct from the persistent GGC heap.
+
+**Result:** ✅ **VERIFIED**.
+
 ### Claim 2: Bitmap Bulk Cleanup Strategy
 
 **Method:** Source Code Inspection
@@ -256,16 +270,18 @@ This document records the rigorous validation process applied to the AI-generate
 
 **Result:** ✅ **VERIFIED**.
 
-### Claim 3: Pool Release Mechanism
+### Claim 3: Bitmap Cleanup in `rewrite_blocks` (AI Claim)
 
 **Method:** Source Code Inspection
 
 **Evidence:**
-
-* **File:** `gcc/alloc-pool.h`
+* **File:** `gcc/tree-into-ssa.cc`
 * **Finding:**
-  * Examined the `release()` method within the `object_allocator` class.
-  * Key code: it calls `m_allocator.release()`.
-* **Analysis:** This confirms the architectural claim: `object_allocator` is a wrapper around an underlying allocator (`m_allocator`). When released, it returns memory to the system (or the parent block allocator), ensuring that pass-specific memory is distinct from the persistent GGC heap.
+  * Checked function `rewrite_blocks`. **Negative.** It does not contain `bitmap_obstack_release` or initialization logic.
+  * Checked function `compute_global_livein`. **Negative.** Function does not exist in this file.
+  * **Actual Location Found:** usage of `bitmap_obstack_initialize` was found in `init_ssa_renamer` and `bitmap_obstack_release` in `fini_ssa_renamer`.
 
-**Result:** ✅ **VERIFIED**.
+
+* **Analysis:** The AI correctly identified the mechanism (obstack bitmaps) but hallucinated the specific function names where the lifecycle management occurs.
+* **Result:** ❌ **INACCURATE (FAILED)**.
+  * *Action Taken:* Sent a **Refinement Prompt** to correct the report with the actual function names (`init_ssa_renamer` / `fini_ssa_renamer`).

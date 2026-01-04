@@ -223,7 +223,28 @@ The model explained the core GC architecture:
 
 > [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
 
-## Prompt 7: Conclusions
+
+## Prompt 7: Prompt 6 Refinement - Correction of Tree-SSA Case Study
+**Goal:** Correct technical hallucinations in the previous output. The initial report incorrectly cited `rewrite_blocks` and `compute_global_livein` as the location of memory management logic. I verified the source code and found the logic actually resides in `init_ssa_renamer` and `fini_ssa_renamer`.
+
+**Prompt Used:**
+
+>**Context:** We are refining the "Phase 4" section. I have audited your previous response against the GCC source code and found specific errors in the "Case Study" section regarding function names.
+>
+>**The Errors:**
+>1. You cited `rewrite_blocks` as containing the initialization/cleanup logic. While the function exists, the memory calls are not inside it.
+>2. You cited `compute_global_livein`, which does not exist in the file.
+>
+>**Task:**
+>Rewrite the **"Case Study: Tree-SSA"** subsection with the following corrected facts:
+>* **Initialization:** The `bitmap_obstack_initialize (&update_ssa_obstack)` call happens inside `init_ssa_renamer` (which is called by `pass_build_ssa::execute`).
+>* **Cleanup:** The `bitmap_obstack_release (&update_ssa_obstack)` call happens inside `fini_ssa_renamer` (called by `delete_update_ssa`).
+>
+>**Format:** Update the report text to reflect these specific source code locations.
+
+> [See Verification of this output](./verification.md#verification-of-prompt-4-the-ggc-subsystem)
+
+## Prompt 8: Conclusions
 **Model:** Gemini 3 Pro
 
 **Goal:** Generate the final Conclusion. Synthesize the findings from all phases to answer the project's core question regarding the trade-offs between performance (Pools/Obstacks) and correctness (GGC for complex graphs).

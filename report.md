@@ -226,25 +226,30 @@ Data flow analysis relies heavily on bitmaps to represent sets (e.g., "registers
 * **Mechanism:** A `bitmap` in GCC is a linked list of elements. To prevent fragmentation, passes initialize a `bitmap_obstack`. All linked list nodes for bitmaps created in that context are allocated from this linear memory region.
 * **Scope:** When the pass finishes, releasing the single `bitmap_obstack` instantly frees every node of every bitmap used during the analysis.
 
-### 3. Case Study: The Tree-SSA Pass
+### 3. Case Study: The Tree-SSA Renaming Pass
 
-The transition into Static Single Assignment (SSA) form demonstrates this hybrid model perfectly.
+The transition into Static Single Assignment (SSA) form demonstrates this hybrid model perfectly. The logic for renaming variables into SSA versions uses transient data structures that are scoped strictly to the renaming phase.
 
 * **Source File:** `gcc/tree-into-ssa.cc`
-* **Initialization:** At the beginning of the pass (specifically in `rewrite_blocks`), the pass initializes its local memory contexts:
+* **Lifecycle Management:** The memory management is explicitly tied to the SSA builder pass (specifically within `pass_build_ssa::execute`).
+* **Initialization:** Before the renaming logic begins, the function `init_ssa_renamer` is called. It establishes the local allocation context:
     ```cpp
-    /* From tree-into-ssa.cc */
-    bitmap_obstack_initialize (&liveness_bitmap_obstack);
-    ```
+    /* From tree-into-ssa.cc, inside init_ssa_renamer */
+    bitmap_obstack_initialize (&update_ssa_obstack);
 
-* **Usage:** During the `compute_global_livein` phase, the compiler creates temporary bitmaps representing live-in sets for Control Flow Graph (CFG) blocks. These bitmaps are backed by the initialized obstack, not the global GGC heap.
-* **Termination:** Once the SSA renaming is complete and the `tree` IR has been updated, the pass tears down the local storage:
-    ```cpp
-    bitmap_obstack_release (&liveness_bitmap_obstack);
     ```
 
 
-This single call reclaims megabytes of temporary analysis data instantly.
+This prepares `update_ssa_obstack`, a region of memory dedicated entirely to bitmaps required during the renaming (such as tracking old vs. new variable versions).
+* **Usage:** Throughout the renaming process, temporary bitmaps are allocated. These bitmaps act as sets to track variable definitions across basic blocks. Because they are backed by the `update_ssa_obstack`, these allocations are fast pointer bumps.
+* **Termination:** Once the SSA form is built, the function `fini_ssa_renamer` is invoked. This performs the critical bulk deallocation:
+    ```cpp
+    /* From tree-into-ssa.cc, inside fini_ssa_renamer */
+    bitmap_obstack_release (&update_ssa_obstack);
+
+    ```
+
+With this single call, every temporary bitmap node created during the entire SSA construction pass is invalidated. The memory is reclaimed instantly without requiring the global Garbage Collector to scan it.
 
 ### 4. Trade-off Analysis: Pools vs. GGC
 
@@ -259,7 +264,9 @@ GCC’s "Hybrid" memory model is a deliberate architectural choice driven by spe
 | **Safety** | **Low:** Dangling pointers are possible if references escape the pass. | **High:** Safe against dangling pointers (auto-reclaimed). |
 
 **Design Rationale:**
-GCC uses GGC for the **IR (Intermediate Representation)** because IR nodes form a complex, cyclic graph where ownership is shared across many passes. It uses **Pools/Obstacks** for **Analysis Data** because this data is strictly hierarchical and local to the algorithm computing it. Mixing these models prevents the "GC Pause" problem from dominating compilation time.
+
+GCC uses GGC for the **IR (Intermediate Representation)** because IR nodes form a complex, cyclic graph where ownership is shared across many passes. It uses 
+**Pools/Obstacks** for **Analysis Data** because this data is strictly hierarchical and local to the algorithm computing it. Mixing these models prevents the "GC Pause" problem from dominating compilation time.
 
 ## Conclusion: The Hybrid Memory Architecture of GCC
 
