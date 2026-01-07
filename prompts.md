@@ -125,8 +125,6 @@ The model rewrote the report to reflect the modern codebase:
 > **Verification Requirements:**
 > * In Section 2, focus only on **Critical Mechanisms**.
 > * Example: Verify the "bump pointer" logic in `obstack.h` or the definition of `bitmap_obstack`.
-> 
-> 
 
 **Output Summary:**
 The model provided a deep technical breakdown:
