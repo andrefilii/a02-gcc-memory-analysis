@@ -7,7 +7,12 @@ This document records the rigorous validation process applied to the AI-generate
 1.  **Critical Claim Validation:** Specific, high-risk claims (e.g., $O(1)$ allocation logic, Garbage Collection mechanisms) were isolated and verified using the evidence recorded below.
 2.  **Continuous Codebase Auditing:** Beyond the specific entries listed here, the GCC source code (GitHub) was used as the primary truth source. Every file path, function name, and data structure mentioned in the report was cross-referenced with the actual source tree.
     * *Note on Drift:* Minor syntactical differences (e.g., a function being wrapped in a macro or template) were accepted if the **core algorithmic logic** remained identical to the report's description.
-3.  **Secondary Sources:** Where code complexity was high, findings were triangulated with official GCC internals documentation and forums, though priority was always given to the code itself.
+3. **Secondary Sources**
+Where the code complexity was high, I triangulated my findings with other resources, though I always prioritized the code itself.
+    * **General Knowledge:** I consulted external documentation to double-check general concepts cited by the AI (asking it to explain and then verifying independently). For example, I referenced materials on [Region-based memory management](https://en.wikipedia.org/wiki/Region-based_memory_management).
+    * **[GCC Docs](https://gcc.gnu.org/onlinedocs/gcc-15.2.0/gcc/):** While this is technically the most complete documentation, I found it difficult to navigate and often lacking in clear deep dives regarding memory architecture. For this reason, I primarily used it for specific definitions rather than understanding the broader system.
+    * **[GCC Wiki](https://gcc.gnu.org/wiki/):** I found this much more useful for high-level overviews. Specifically, the [Memory Management section](https://gcc.gnu.org/wiki/Memory_management) and its related pages (such as [BoehmGC integration](https://gcc.gnu.org/wiki/BoehmGCForGCC)) provided better context than the official manuals.
+    * **The Codebase & C++ Transition:** As stated before, the codebase was my primary source. I found it to be written very clearly, especially considering the transition to C++ (I referenced this [Slashdot discussion]((https://developers.slashdot.org/story/12/08/15/1338212/gcc-switches-from-c-to-c)) primarily to verify the historical context of the switch and noted that, as the forum shows, it was not welcomed by all developers at the time). Ultimately, trying to understand the functions and file connections on my own was what allowed me to verify the AI's claims, rather than relying on external discussions.
 
 
 ## Verification of Prompt 1: High-Level Architecture
